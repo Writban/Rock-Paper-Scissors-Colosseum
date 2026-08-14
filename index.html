@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RPS Gladiator — Adaptive Arena</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ADAPTIVE COMBAT SIMULATION</p>
+        <h1>RPS GLADIATOR</h1>
+      </div>
+      <div class="top-actions">
+        <button id="modeArena" class="mode-btn active">Arena</button>
+        <button id="modePlayground" class="mode-btn">Playground</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-grid">
+        <article class="fighter player-card">
+          <div class="fighter-head">
+            <div>
+              <p class="kicker">YOU</p>
+              <h2>Contender</h2>
+            </div>
+            <div id="playerLockBadge" class="badge muted">UNLOCKED</div>
+          </div>
+          <div id="playerSequence" class="sequence-row" aria-label="Player sequence"></div>
+          <p class="micro" id="playerHint">Choose your sequence. Your selections remain private until the bout resolves.</p>
+        </article>
+
+        <div class="versus">VS</div>
+
+        <article class="fighter ai-card">
+          <div class="fighter-head">
+            <div>
+              <p class="kicker">OPPONENT</p>
+              <h2 id="aiRank">Observer</h2>
+            </div>
+            <div id="aiLockBadge" class="badge sealed">SEALED</div>
+          </div>
+          <div id="aiSequence" class="sequence-row hidden-sequence" aria-label="AI sequence"></div>
+          <p class="micro" id="aiHint">The Gladiator has already committed to a hidden sequence using only previous bouts.</p>
+        </article>
+      </section>
+
+      <section class="control-panel">
+        <div class="control-row">
+          <div>
+            <label for="boutLength">Bout length</label>
+            <select id="boutLength">
+              <option value="3">3 moves</option>
+              <option value="5" selected>5 moves</option>
+              <option value="7">7 moves</option>
+              <option value="10">10 moves</option>
+            </select>
+          </div>
+          <div class="status-block">
+            <span class="status-label">Mode</span>
+            <strong id="modeLabel">Arena</strong>
+          </div>
+          <div class="status-block">
+            <span class="status-label">Observed bouts</span>
+            <strong id="observedBouts">0</strong>
+          </div>
+          <div class="status-block">
+            <span class="status-label">Prediction accuracy</span>
+            <strong id="accuracy">—</strong>
+          </div>
+        </div>
+
+        <div class="attack-builder">
+          <div>
+            <span class="picker-label">1. Choose commitment</span>
+            <div id="levelPicker" class="level-picker" aria-label="Attack intensity">
+              <button class="level-btn light" data-level="L"><strong>LIGHT</strong><span>Feint · ×0.5</span></button>
+              <button class="level-btn standard selected" data-level="S"><strong>STANDARD</strong><span>Proper attack · ×1</span></button>
+              <button class="level-btn heavy" data-level="H"><strong>HEAVY</strong><span>Full weight · ×2</span></button>
+            </div>
+            <p id="selectedAttack" class="selected-attack">Standard — Proper attack · ×1 force / exposure</p>
+          </div>
+          <div>
+            <span class="picker-label">2. Choose symbol to add it to your sequence</span>
+            <div id="movePicker" class="move-picker">
+              <button class="move-btn rock" data-move="R"><span>✊</span>Rock</button>
+              <button class="move-btn paper" data-move="P"><span>✋</span>Paper</button>
+              <button class="move-btn scissors" data-move="S"><span>✌️</span>Scissors</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="damage-rule">
+          <strong>Damage rule</strong>
+          <span>Winner's force × loser's exposure × 1D. Light = 0.5, Standard = 1, Heavy = 2.</span>
+          <span class="damage-examples">HH = 4D · HS = 2D · HL = 1D · SS = 1D · LL = 0.25D</span>
+        </div>
+
+        <div class="primary-actions">
+          <button id="commitPlayerBtn" class="primary">Lock my sequence</button>
+          <button id="peekBtn" class="danger" hidden>Break the seal & peek</button>
+          <button id="resolveBtn" class="primary" hidden>Resolve bout</button>
+          <button id="newBoutBtn" class="ghost" hidden>New bout</button>
+        </div>
+
+        <div id="playgroundNotice" class="notice" hidden>
+          <strong>Playground fairness test:</strong> first lock the symbols and intensities you genuinely intended to play. The Gladiator then commits without receiving those actions. You may break its seal, inspect its full hand, and change yours. The original sequence is preserved for comparison and altered actions are excluded from learning.
+        </div>
+      </section>
+
+      <section id="resultPanel" class="result-panel" hidden>
+        <div class="result-head">
+          <div>
+            <p class="eyebrow">BOUT RESULT</p>
+            <h2 id="resultTitle">—</h2>
+          </div>
+          <div><span class="score-caption">DAMAGE DEALT</span><div id="resultScore" class="score">0D–0D</div></div>
+        </div>
+        <div id="roundResults" class="round-results"></div>
+
+        <div id="fairnessComparison" class="fairness-comparison" hidden>
+          <div class="compare-card">
+            <p class="kicker">ORIGINAL INTENTION</p>
+            <div id="originalSequenceSummary" class="mini-sequence"></div>
+            <strong id="originalOutcome">—</strong>
+          </div>
+          <div class="compare-card">
+            <p class="kicker">AFTER PEEKING</p>
+            <div id="alteredSequenceSummary" class="mini-sequence"></div>
+            <strong id="alteredOutcome">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="feedbackPanel" class="feedback-card" hidden>
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">PLAYER FEEDBACK</p>
+            <h2>Did the Gladiator feel fair?</h2>
+          </div>
+          <span id="feedbackSaved" class="badge muted">OPTIONAL</span>
+        </div>
+        <div class="feedback-grid">
+          <fieldset>
+            <legend>Do you believe the opponent's sequence was genuinely locked before the reveal?</legend>
+            <label><input type="radio" name="trust" value="yes"> Yes</label>
+            <label><input type="radio" name="trust" value="unsure"> Unsure</label>
+            <label><input type="radio" name="trust" value="no"> No</label>
+          </fieldset>
+          <fieldset>
+            <legend>Did its original committed hand seem to exploit patterns in your intended symbols or commitment levels?</legend>
+            <label><input type="radio" name="adapted" value="yes"> Yes</label>
+            <label><input type="radio" name="adapted" value="somewhat"> Somewhat</label>
+            <label><input type="radio" name="adapted" value="no"> No</label>
+          </fieldset>
+        </div>
+        <label class="comment-label" for="feedbackComment">Anything that made the bout feel suspicious or convincing?</label>
+        <textarea id="feedbackComment" rows="3" placeholder="Optional note"></textarea>
+        <div class="primary-actions feedback-actions">
+          <button id="saveFeedbackBtn" class="ghost">Save feedback locally</button>
+          <span class="micro">Prototype only: feedback stays in this browser.</span>
+        </div>
+      </section>
+
+      <section class="audit-grid">
+        <article class="audit-card">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">FAIR PLAY</p>
+              <h2>Commitment audit</h2>
+            </div>
+            <span id="verificationBadge" class="badge muted">WAITING</span>
+          </div>
+          <dl class="audit-list">
+            <div><dt>AI commitment</dt><dd id="aiCommitment">Not created</dd></div>
+            <div><dt>Player commitment</dt><dd id="playerCommitment">Not created</dd></div>
+            <div><dt>Current bout used for AI prediction</dt><dd id="currentBoutUsed">No</dd></div>
+            <div><dt>Model update</dt><dd id="modelUpdate">After resolution only</dd></div>
+          </dl>
+          <button id="toggleProofBtn" class="ghost small">Show verification details</button>
+          <div id="proofDetails" class="proof-details" hidden></div>
+        </article>
+
+        <article class="audit-card">
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">ADAPTATION</p>
+              <h2>What the Gladiator currently believes</h2>
+            </div>
+          </div>
+          <p class="prediction-label">SYMBOL</p>
+          <div id="predictionBars" class="prediction-bars"></div>
+          <p class="prediction-label">COMMITMENT</p>
+          <div id="intensityPredictionBars" class="prediction-bars"></div>
+          <p class="micro">Both sets of probabilities are derived from prior bouts only. They are predictions, not knowledge of your current hand.</p>
+        </article>
+      </section>
+
+      <section class="history-card">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">MEMORY</p>
+            <h2>Bout history</h2>
+          </div>
+          <button id="resetBtn" class="ghost small">Reset opponent memory</button>
+        </div>
+        <div id="historyList" class="history-list"><p class="micro">No bouts observed yet.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <template id="slotTemplate">
+    <div class="slot">
+      <span class="slot-index"></span>
+      <div class="slot-value">?</div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
