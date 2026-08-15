@@ -1,6 +1,16 @@
 # RPS Gladiator — adaptive fairness + intensity prototype
 
+<p align="center">
+  <a href="https://writban.github.io/Rock-Paper-Scissors-Colosseum/"><strong>Play the live prototype</strong></a>
+</p>
+
 A browser prototype for an adaptive Rock–Paper–Scissors opponent with a visible commit–reveal fairness system and a second strategic layer: **Light / Standard / Heavy** commitment.
+
+## Why this project exists
+
+A normal adaptive opponent can feel unfair if the player cannot tell whether it predicted their behaviour or simply reacted after seeing their input. This prototype separates those concerns: the opponent commits to its hidden sequence first, then reveals the sequence and nonce after the bout so the player can verify the original SHA-256 commitment.
+
+The game also adds an intensity choice to each Rock, Paper or Scissors action, turning each move into both a symbol choice and a risk/reward decision.
 
 ## Combat rules
 
@@ -38,12 +48,11 @@ This makes Heavy a wager rather than a straight upgrade: it can deliver more dam
 - Migration support for old prototype history: old R/P/S-only actions are treated as Standard attacks.
 - Responsive layout for desktop and mobile.
 
-## Run it
+## Run locally
 
 Because the prototype uses the browser Web Crypto API, serve the folder from localhost rather than opening `index.html` directly.
 
 ```bash
-cd rps-gladiator
 python -m http.server 8000
 ```
 
