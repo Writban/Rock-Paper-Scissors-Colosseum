@@ -1,5 +1,7 @@
 # RPS Gladiator — adaptive fairness + intensity prototype
 
+[![Static checks](https://github.com/Writban/Rock-Paper-Scissors-Colosseum/actions/workflows/static-checks.yml/badge.svg)](https://github.com/Writban/Rock-Paper-Scissors-Colosseum/actions/workflows/static-checks.yml)
+
 <p align="center">
   <a href="https://writban.github.io/Rock-Paper-Scissors-Colosseum/"><strong>Play the live prototype</strong></a>
 </p>
@@ -47,6 +49,13 @@ This makes Heavy a wager rather than a straight upgrade: it can deliver more dam
 - Peeked/altered actions are not used as the player's behavioural history; the preserved original intention is used instead.
 - Migration support for old prototype history: old R/P/S-only actions are treated as Standard attacks.
 - Responsive layout for desktop and mobile.
+
+## Engineering notes
+
+- The fairness mechanism uses the browser Web Crypto API rather than a custom hash implementation.
+- Adaptive behaviour is based on prior-bout history so the current bout is not used as hidden information for prediction.
+- The project explicitly separates the cryptographic claim it *can* make from the stronger claim it cannot: the revealed sequence can be verified against the earlier commitment, but a frontend-only app cannot independently prove when that commitment was created.
+- A GitHub Actions workflow checks JavaScript syntax and verifies the essential static files on pushes and pull requests.
 
 ## Run locally
 
